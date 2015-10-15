@@ -1,6 +1,6 @@
 # ShowTrackr---MEAN
 
-Create a TV Show Tracker using AngularJS, Node.js and MongoDB.
+Create a TV Show Tracker using MEAN stack.
 
 - The front-end will be built using AngularJS and Bootstrap Sass.
 
