@@ -211,8 +211,10 @@ app.post('/api/shows', function (req, res, next) {
         }
         return next(err);
       }
+
       var alertDate = Date.create('Next ' + show.airsDayOfWeek + ' at ' + show.airsTime).rewind({ hour: 2});
       agenda.schedule(alertDate, 'send email alert', show.name).repeatEvery('1 week');
+      
       res.send(200);
     });
   });
