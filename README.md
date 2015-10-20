@@ -21,7 +21,7 @@ Create a TV Show Tracker using MEAN stack.
 
 - Use lodash dependency (js utility lib) for delivering consistency, modularity, performance, & extras.
 
-- Storing the poster as Base64 images in MongoDB (although it has a disadvantage that  each image is about 30% larger in the Base64 form).
+- The poster are stored as Base64 images in MongoDB (although it has a disadvantage that  each image is about 30% larger in the Base64 form).
 
 - 
 
