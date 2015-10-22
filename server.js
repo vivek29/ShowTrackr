@@ -3,6 +3,7 @@ var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
+var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
 var mongoose = require('mongoose');
 var jwt = require('jwt-simple');
@@ -11,6 +12,10 @@ var moment = require('moment');
 var async = require('async');
 var request = require('request');
 var xml2js = require('xml2js');
+
+var agenda = require('agenda')({ db: { address: 'mongodb://vivek.29:vivek25555@ds041924.mongolab.com:41924/showtrackr' } });
+var sugar = require('sugar');
+var nodemailer = require('nodemailer');
 var _ = require('lodash');
 
 var tokenSecret = 'your unique secret';
@@ -87,7 +92,7 @@ var User = mongoose.model('User', userSchema);
 var Show = mongoose.model('Show', showSchema);
 
 // connecting to the database
-mongoose.connect('localhost');
+mongoose.connect('mongodb://vivek.29:vivek25555@ds041924.mongolab.com:41924/showtrackr');
 
 var app = express();
 
@@ -97,7 +102,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// for subscribe and unsubsacribe api's
+// For subscribe and unsubsacribe api's - Middleware to prevent unauthenticated users from accessing these route handlers - 
 function ensureAuthenticated(req, res, next) {
   if (req.headers.authorization) {
     var token = req.headers.authorization.split(' ')[1];
@@ -121,8 +126,8 @@ function ensureAuthenticated(req, res, next) {
 function createJwtToken(user) {
   var payload = {
     user: user,
-    iat: new Date().getTime(),
-    exp: moment().add('days', 7).valueOf()
+    iat: new Date().getTime(),                // issued at
+    exp: moment().add('days', 7).valueOf()    // expiry
   };
   return jwt.encode(payload, tokenSecret);
 }
@@ -148,6 +153,66 @@ app.post('/auth/login', function(req, res, next) {
       if (!isMatch) return res.send(401, 'Invalid email and/or password');
       var token = createJwtToken(user);
       res.send({ token: token });
+    });
+  });
+});
+
+
+// facebook authentication
+app.post('/auth/facebook', function(req, res, next) {
+  var profile = req.body.profile;
+  var signedRequest = req.body.signedRequest;
+  var encodedSignature = signedRequest.split('.')[0];
+  var payload = signedRequest.split('.')[1];
+
+  var appSecret = '298fb6c080fda239b809ae418bf49700';
+
+  var expectedSignature = crypto.createHmac('sha256', appSecret).update(payload).digest('base64');
+  expectedSignature = expectedSignature.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  if (encodedSignature !== expectedSignature) {
+    return res.send(400, 'Invalid Request Signature');
+  }
+
+  User.findOne({ facebook: profile.id }, function(err, existingUser) {
+    if (existingUser) {
+      var token = createJwtToken(existingUser);
+      return res.send(token);
+    }
+    var user = new User({
+      name: profile.name,
+      facebook: {
+        id: profile.id,
+        email: profile.email
+      }
+    });
+    user.save(function(err) {
+      if (err) return next(err);
+      var token = createJwtToken(user);
+      res.send(token);
+    });
+  });
+});
+
+// google suthentication
+app.post('/auth/google', function(req, res, next) {
+  var profile = req.body.profile;
+  User.findOne({ google: profile.id }, function(err, existingUser) {
+    if (existingUser) {
+      var token = createJwtToken(existingUser);
+      return res.send(token);
+    }
+    var user = new User({
+      name: profile.displayName,
+      google: {
+        id: profile.id,
+        email: profile.emails[0].value
+      }
+    });
+    user.save(function(err) {
+      if (err) return next(err);
+      var token = createJwtToken(user);
+      res.send(token);
     });
   });
 });
@@ -272,21 +337,41 @@ app.post('/api/shows', function (req, res, next) {
         return next(err);
       }
 
+      // also start the agenda task (whenever a new show is added)
+      // Also, using Sugar.js to create a overriden Date object(alertDate)
       var alertDate = Date.create('Next ' + show.airsDayOfWeek + ' at ' + show.airsTime).rewind({ hour: 2});
       agenda.schedule(alertDate, 'send email alert', show.name).repeatEvery('1 week');
-      
+        
       res.send(200);
     });
   });
 });
 
 
+// Subscribe route
+app.post('/api/subscribe', ensureAuthenticated, function(req, res, next) {
+  Show.findById(req.body.showId, function(err, show) {
+    if (err) return next(err);
+    show.subscribers.push(req.user._id);
+    show.save(function(err) {
+      if (err) return next(err);
+      res.send(200);
+    });
+  });
+});
 
-
-
-
-
-
+// Unsubscribe route
+app.post('/api/unsubscribe', ensureAuthenticated, function(req, res, next) {
+  Show.findById(req.body.showId, function(err, show) {
+    if (err) return next(err);
+    var index = show.subscribers.indexOf(req.user._id);
+    show.subscribers.splice(index, 1);        // remove specified id
+    show.save(function(err) {
+      if (err) return next(err);
+      res.send(200);
+    });
+  });
+});
 
 
 // Redirect other routes to original url
@@ -304,4 +389,54 @@ app.use(function(err, req, res, next) {
 
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
+});
+
+// scheduling a job usinf Agenda
+agenda.define('send email alert', function(job, done) {
+  Show.findOne({ name: job.attrs.data }).populate('subscribers').exec(function(err, show) {
+    var emails = show.subscribers.map(function(user) {      // get the list of all emails
+      if (user.facebook) {
+        return user.facebook.email;
+      } else if (user.google) {
+        return user.google.email
+      } else {
+        return user.email
+      }
+    });
+
+    // brief summary abt upcoming episode
+    var upcomingEpisode = show.episodes.filter(function(episode) {
+      return new Date(episode.firstAired) > new Date();
+    })[0];
+
+    // nodemailer boilerplate for sending emails
+    var smtpTransport = nodemailer.createTransport('SMTP', {
+      service: 'SendGrid',
+      auth: { user: 'hslogin', pass: 'hspassword00' }
+    });
+
+    var mailOptions = {
+      from: 'Fred Foo ✔ <foo@blurdybloop.com>',
+      to: emails.join(','),
+      subject: show.name + ' is starting soon!',
+      text: show.name + ' starts in less than 2 hours on ' + show.network + '.\n\n' +
+      'Episode ' + upcomingEpisode.episodeNumber + ' Overview\n\n' + upcomingEpisode.overview
+    };
+
+    smtpTransport.sendMail(mailOptions, function(error, response) {
+      console.log('Message sent: ' + response.message);
+      smtpTransport.close();
+      done();
+    });
+  });
+});
+
+//agenda.start();
+
+agenda.on('start', function(job) {
+  console.log("Job %s starting", job.attrs.name);
+});
+
+agenda.on('complete', function(job) {
+  console.log("Job %s finished", job.attrs.name);
 });
