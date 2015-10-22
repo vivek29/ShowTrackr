@@ -13,7 +13,7 @@ var async = require('async');
 var request = require('request');
 var xml2js = require('xml2js');
 
-var agenda = require('agenda')({ db: { address: 'mongodb://vivek:showtrackr@ds041924.mongolab.com:41924/showtrackr' } });
+var agenda = require('agenda')({ db: { address: 'mongodb://vivek:foobar@ds043694.mongolab.com:43694/showtrackr' } });
 var sugar = require('sugar');
 var nodemailer = require('nodemailer');
 var _ = require('lodash');
@@ -92,7 +92,7 @@ var User = mongoose.model('User', userSchema);
 var Show = mongoose.model('Show', showSchema);
 
 // connecting to the database -- it takes dbname and dbpassword (not loginname or loginpassword)
-mongoose.connect('mongodb://vivek:showtrackr@ds041924.mongolab.com:41924/showtrackr');
+mongoose.connect('mongodb://vivek:foobar@ds043694.mongolab.com:43694/showtrackr');
 
 var app = express();
 
