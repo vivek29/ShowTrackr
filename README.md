@@ -38,10 +38,7 @@ Create a TV Show Tracker using MEAN stack.
 - For sending email notifications - use Agenda, Sugar.js and nodemailer
 
 - Optimization of code using gulp.js
-
-Concatenate and minify the scripts 
-Minify the stylesheet
-Cache AngularJS templates 
+Concatenate and minify the scripts, Minify the stylesheet and Cache AngularJS templates 
 
 - The optimization creates 2 scripts which are app.min.js and templates.js
 
