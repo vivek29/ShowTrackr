@@ -91,7 +91,7 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
 var User = mongoose.model('User', userSchema);
 var Show = mongoose.model('Show', showSchema);
 
-// connecting to the database
+// connecting to the database -- it takes dbname and dbpassword (not loginname or loginpassword)
 mongoose.connect('mongodb://vivek:showtrackr@ds041924.mongolab.com:41924/showtrackr');
 
 var app = express();

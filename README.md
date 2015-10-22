@@ -23,7 +23,28 @@ Create a TV Show Tracker using MEAN stack.
 
 - The poster are stored as Base64 images in MongoDB (although it has a disadvantage that  each image is about 30% larger in the Base64 form).
 
-- 
+- Use moment.js to output a more friendly date (like in 6 hours or in 5 days)
+
+- Use ng-Messages for rending error messages in forms
+
+- Use JSON Web Token(jwt) authentication instead of cookie-based approach
+
+- Login with Facebook/Google
+
+- Use ngAnnotate instead of ngMin for AngularJS dependencies annotations
+
+- Use promises instead of callbacks for $resource.save method
+
+- For sending email notifications - use Agenda, Sugar.js and nodemailer
+
+- Optimization of code using gulp.js
+
+Concatenate and minify the scripts 
+Minify the stylesheet
+Cache AngularJS templates 
+
+- The optimization creates 2 scripts which are app.min.js and templates.js
+
 
 
 
