@@ -14,12 +14,12 @@
 <div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top"
      role="navigation" bs-navbar>
   <div class="navbar-header">
-    <a class="navbar-brand" ng-href="/">
+    <a class="navbar-brand" ng-click="setTitle('Top 12 Shows')">
       <span class="glyphicon glyphicon-film"></span>
       Show<strong>Trackr</strong></a>
   </div>
   <ul class="nav navbar-nav">
-    <li data-match-route="/$"><a ng-href="/">Home</a></li>
+    <li class="btn-pointer" data-match-route="/$"><a ng-click="setTitle('Top 12 Shows')">Home</a></li>
     <li data-match-route="/add"><a href="/add">Add</a></li>
   </ul>
   <ul class="nav navbar-nav pull-right" ng-if="!currentUser">

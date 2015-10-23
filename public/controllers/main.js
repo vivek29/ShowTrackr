@@ -1,5 +1,5 @@
 angular.module('MyApp')
-  .controller('MainCtrl', function($scope, Show) {
+  .controller('MainCtrl', function($scope, $rootScope, $location, Show) {
     
     $scope.alphabet = ['0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
       'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -14,6 +14,12 @@ angular.module('MyApp')
     $scope.headingTitle = 'Top 12 Shows';
     
     $scope.shows = Show.query();
+
+    $rootScope.setTitle = function (title) {
+          $scope.headingTitle = 'Top 12 Shows';
+          $scope.shows = Show.query();
+          $location.path("/");
+    }
     
     $scope.filterByGenre = function(genre) {
       $scope.shows = Show.query({ genre: genre });

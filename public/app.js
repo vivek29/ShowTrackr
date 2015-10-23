@@ -24,8 +24,8 @@ angular.module('MyApp', ['ngResource', 'ngMessages', 'ngRoute', 'ngAnimate', 'mg
         controller: 'AddCtrl'
       })
       .otherwise({
-        redirectTo: '/'
-      });
+        redirectTo: '/'  
+      });  
   })
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($rootScope, $q, $window, $location) {
@@ -44,5 +44,7 @@ angular.module('MyApp', ['ngResource', 'ngMessages', 'ngRoute', 'ngAnimate', 'mg
         }
       }
     });
-  });
+  })
+
+
   
