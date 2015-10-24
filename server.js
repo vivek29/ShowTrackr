@@ -194,7 +194,7 @@ app.post('/auth/facebook', function(req, res, next) {
   });
 });
 
-// google suthentication
+// google authentication
 app.post('/auth/google', function(req, res, next) {
   var profile = req.body.profile;
   User.findOne({ google: profile.id }, function(err, existingUser) {
@@ -391,7 +391,7 @@ app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-// scheduling a job usinf Agenda
+// scheduling a job using Agenda
 agenda.define('send email alert', function(job, done) {
   Show.findOne({ name: job.attrs.data }).populate('subscribers').exec(function(err, show) {
     var emails = show.subscribers.map(function(user) {      // get the list of all emails
@@ -404,7 +404,7 @@ agenda.define('send email alert', function(job, done) {
       }
     });
 
-    // brief summary abt upcoming episode
+    // brief summary about upcoming episode
     var upcomingEpisode = show.episodes.filter(function(episode) {
       return new Date(episode.firstAired) > new Date();
     })[0];
