@@ -165,7 +165,7 @@ app.post('/auth/facebook', function(req, res, next) {
   var encodedSignature = signedRequest.split('.')[0];
   var payload = signedRequest.split('.')[1];
 
-  var appSecret = '298fb6c080fda239b809ae418bf49700';
+  var appSecret = '539d196b6e135f64da89c0fb9ae6606b'; // get from FB , register an app
 
   var expectedSignature = crypto.createHmac('sha256', appSecret).update(payload).digest('base64');
   expectedSignature = expectedSignature.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -217,7 +217,6 @@ app.post('/auth/google', function(req, res, next) {
     });
   });
 });
-
 
 // to check for emails
 app.get('/api/users', function(req, res, next) {
