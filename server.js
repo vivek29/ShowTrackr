@@ -174,7 +174,7 @@ app.post('/auth/facebook', function(req, res, next) {
     return res.send(400, 'Invalid Request Signature');
   }
 
-  User.findOne({ facebook: profile.id }, function(err, existingUser) {
+  User.findOne({ 'facebook.id': profile.id }, function(err, existingUser) {
     if (existingUser) {
       var token = createJwtToken(existingUser);
       return res.send(token);
@@ -197,7 +197,8 @@ app.post('/auth/facebook', function(req, res, next) {
 // google authentication
 app.post('/auth/google', function(req, res, next) {
   var profile = req.body.profile;
-  User.findOne({ google: profile.id }, function(err, existingUser) {
+
+  User.findOne({ 'google.id': profile.id }, function(err, existingUser) {
     if (existingUser) {
       var token = createJwtToken(existingUser);
       return res.send(token);
@@ -218,6 +219,17 @@ app.post('/auth/google', function(req, res, next) {
 });
 
 
+// to check for emails
+app.get('/api/users', function(req, res, next) {
+  if (!req.query.email) {
+    return res.send(400, { message: 'Email parameter is required.' });
+  }
+
+  User.findOne({ email: req.query.email }, function(err, user) {
+    if (err) return next(err);
+    res.send({ available: !user });
+  });
+});
 
 // API Route
 app.get('/api/shows', function(req, res, next) {

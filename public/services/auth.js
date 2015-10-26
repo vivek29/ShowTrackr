@@ -11,7 +11,7 @@ angular.module('MyApp')
       FB.init({
         appId: '624059410963642',
         responseType: 'token',
-        version: 'v2.0'
+        version: 'v2.4'
       });
     };
 
