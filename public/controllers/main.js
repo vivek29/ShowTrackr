@@ -13,7 +13,7 @@ angular.module('MyApp')
     
     $scope.headingTitle = 'Top 12 Shows';
     
-    $scope.shows = Show.query();
+    $scope.shows = Show.query();          // query - get method which gets an array of shows
 
     $rootScope.setTitle = function (title) {
           $scope.headingTitle = 'Top 12 Shows';
