@@ -4,7 +4,6 @@ Create a TV Show Tracker using MEAN stack.
 
 - The front-end is built using AngularJS and Bootstrap Sass.
 
-
 - Used AngularStrap to Add quick, dynamic navbar functionality to transition through active/inactive states.
 (Preferred over Bootstrap NavBar, so that the active class is applied automatically to the "li" elements when we change routes. Also other advantages like awesome directives that integrate with AngualrJS such as Alert, Typeahead, Tooltip, Tab and many more.)
 
